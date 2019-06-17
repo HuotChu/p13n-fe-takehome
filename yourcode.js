@@ -24,16 +24,17 @@ const initColumnEvents = () => {
   
   const dispatch = ( eventName, target ) => {
     const { id } = target;
+    const label = 'Column with id:';
     let msg = '';
     switch ( eventName ) {
       case 'scrollStart':
-        msg = `Column with id: ${id} started to become visible on the page.`;
+        msg = `${label} ${id} started to become visible on the page.`;
         break;
       case 'scrollHalf':
-        msg = `Column with id: ${id} is now more than 50% visible on the page.`;
+        msg = `${label} ${id} is now more than 50% visible on the page.`;
         break;
       case 'scrollComplete':
-        msg = `Column with id: ${id} is now fully visible on the page.`;
+        msg = `${label} ${id} is now fully visible on the page.`;
     };
     let event = new CustomEvent( `${id}_${eventName}`, { detail: msg } );
     target.dispatchEvent( event );
@@ -43,13 +44,8 @@ const initColumnEvents = () => {
     const fold = Math.ceil( pageYOffset + viewHeight );
     columns.filter( target => target.top <= fold )
           .forEach( target => {
-              if ( fold >= target.bottom ) {
-                dispatch( 'scrollComplete', target.column );
-              } else if ( fold > target.middle ) {
-                dispatch( 'scrollHalf', target.column );
-              } else {
-                dispatch( 'scrollStart', target.column );
-              }
+            let eventName = fold >= target.bottom ? 'scrollComplete' : ( fold > target.middle ) ? 'scrollHalf' : 'scrollStart';
+            dispatch( eventName, target.column );
             } );
             if ( fold === pageHeight ) {
               window.removeEventListener( 'scroll', scanFoldForColumns );
