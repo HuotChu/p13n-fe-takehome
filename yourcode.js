@@ -2,6 +2,7 @@
 const initColumnEvents = () => {
   const pageHeight = document.documentElement.scrollHeight;
   const viewHeight = window.innerHeight;
+  const visibleArea = pageYOffset + viewHeight;
 
   const columns = Array.from( document.querySelectorAll( '.column' ) )
                       .map( column => {
@@ -19,22 +20,22 @@ const initColumnEvents = () => {
                           middle: top + height * .5
                         };
                       } )
-                      .filter( column => column.top > pageYOffset + viewHeight )
+                      .filter( column => column.top > visibleArea )
                       .sort( ( a, b ) => a.top - b.top );
   
   const dispatch = ( eventName, target ) => {
     const { id } = target;
-    const label = 'Column with id:';
+    const label = `Column with id: ${id}`;
     let msg = '';
     switch ( eventName ) {
       case 'scrollStart':
-        msg = `${label} ${id} started to become visible on the page.`;
+        msg = `${label} started to become visible on the page.`;
         break;
       case 'scrollHalf':
-        msg = `${label} ${id} is now more than 50% visible on the page.`;
+        msg = `${label} is now more than 50% visible on the page.`;
         break;
       case 'scrollComplete':
-        msg = `${label} ${id} is now fully visible on the page.`;
+        msg = `${label} is now fully visible on the page.`;
     };
     let event = new CustomEvent( `${id}_${eventName}`, { detail: msg } );
     target.dispatchEvent( event );
@@ -44,7 +45,7 @@ const initColumnEvents = () => {
     const fold = Math.ceil( pageYOffset + viewHeight );
     columns.filter( target => target.top <= fold )
           .forEach( target => {
-            let eventName = fold >= target.bottom ? 'scrollComplete' : ( fold > target.middle ) ? 'scrollHalf' : 'scrollStart';
+            let eventName = fold >= target.bottom ? 'scrollComplete' : fold > target.middle ? 'scrollHalf' : 'scrollStart';
             dispatch( eventName, target.column );
             } );
             if ( fold === pageHeight ) {
